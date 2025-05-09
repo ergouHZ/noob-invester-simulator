@@ -1,0 +1,10 @@
+flask
+openai
+flask-sqlalchemy
+nltk
+scikit-learn
+newsapi-python
+flask-apscheduler
+flask-cors
+python-dotenv
+gunicorn
