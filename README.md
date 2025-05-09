@@ -1,5 +1,5 @@
 # 使用前须知
-
+韭菜咨询模拟器
 本项目仅供学习和研究使用。聚类和分析方法尚未经过验证，AI 的分析结果可能不完全准确，请勿将其作为投资建议或决策依据。请理性参考相关信息。
 
 ---
@@ -14,11 +14,20 @@
 
 ## 演示预览
 
-- 演示链接：//https://（请补充完整网址）
+- 演示链接：[//https://](https://noob-investor.dendi.top/app/)
 
 ---
 
 ## 使用说明
+
+### 环境需求
+
+- 后端
+Python 3.11.8
+pip 23.2.1
+
+- 前端
+
 
 ### 准备工作
 
@@ -27,7 +36,7 @@
 3. 克隆项目仓库：
 
    ```bash
-    git clone https://github.com/ergouHZ/noob-invester-simulator.git
+    git clone https://github.com/ergouHZ/noob-investor-simulator.git
    ```
 
 4. 在 /python_server/.env 文件中配置你的 API Key：

@@ -1,7 +1,6 @@
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ? process.env.NEXT_PUBLIC_BASE_URL : 'http://127.0.0.1:5000';
+
 import { sanitizeArticles } from "@/utils/sanitizeArticles";
-
-const BASE_URL = process.env.REACT_APP_BASE_URL ? process.env.REACT_APP_BASE_URL : 'http://127.0.0.1:5000';
-
 export async function fetchNewsByFilters(start_time, is_headline, page, page_size, keyword) {
     const params = new URLSearchParams();
     params.append('start_time', start_time);
@@ -16,13 +15,13 @@ export async function fetchNewsByFilters(start_time, is_headline, page, page_siz
         method: 'GET',
     });
     const result = await response.json();
-    
+
     return result;
 }
 
 ///调用后端方法聚合文本
 export async function fetchLabelAnalysisKeywords(articles) {
-    
+
     const cleanedArticles = sanitizeArticles(articles)
     const reqBody = {
         articles: cleanedArticles
@@ -33,7 +32,7 @@ export async function fetchLabelAnalysisKeywords(articles) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(reqBody),
     });
-    
+
     const result = await response.json();
     return result.data;
 }

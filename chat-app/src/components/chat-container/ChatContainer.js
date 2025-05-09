@@ -1,5 +1,5 @@
 'use client'
-const BASE_URL = process.env.REACT_APP_BASE_URL ? process.env.REACT_APP_BASE_URL : 'http://127.0.0.1:5000';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ? process.env.NEXT_PUBLIC_BASE_URL : 'http://127.0.0.1:5000';
 // Main chat layout. Handle the most of the services requests, and combine all the child components together
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import { Box, Fab, LinearProgress } from '@mui/material';
@@ -68,8 +68,6 @@ export default function ChatContainer({ articleLabels }) {
         setTimeout(() => {
             scrollToBottom();
         }, 350);
-
-
         setConversationHistory(prevData => {
             return [
                 ...prevData,
