@@ -76,6 +76,9 @@ API Keys configuration
     python app.py
    ```
 
+- 前端已预配置并构建好，存放于 static 文件夹中所以可以通过这个方法直接运行。  
+ Frontend is pre-configured and built, located in the static folder.  
+ 
 
 也可以在运行服务器的基础上通过前端查看  
 You can also view and interact with the system directly through the frontend
@@ -90,9 +93,8 @@ You can also view and interact with the system directly through the frontend
    ```
 
 - 你可以通过浏览器访问 / Access via browser at
-- http://127.0.0.1:5000/
-- 前端已预配置并构建好，存放于 static 文件夹中所以可以通过这个方法直接运行。  
- Frontend is pre-configured and built, located in the static folder.
+- http://127.0.0.1:5000/  
+
 - 若需自定义前端内容，可在 chat-app 目录中修改。  
  To customize frontend, modify files in chat-app directory.  
 
