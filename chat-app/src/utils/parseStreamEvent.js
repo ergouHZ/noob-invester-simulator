@@ -5,7 +5,7 @@ export default function parseStreamEvent(chunkStr) {
         try {
             return JSON.parse(line);
         } catch (e) {
-            console.error('解析失败:', line, e);
+            // console.error('解析失败:', line, e);
             return null; // 或自定义处理
         }
     }).filter(Boolean);
