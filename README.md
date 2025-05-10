@@ -65,7 +65,7 @@ API Keys configuration
     pip install -r requirements.txt
    ```  
 
-      (linux)
+   (linux)
    ```bash
     python3.11 -m pip install --user -r requirements.txt
    ```
