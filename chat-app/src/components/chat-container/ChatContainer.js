@@ -27,7 +27,6 @@ const analyseTypeColors = {
 export default function ChatContainer({ articleLabels }) {
     const [loading, setLoading] = useState(false)
     const [isStreaming, setIsStreaming] = useState(false)
-    const [messages, setMessages] = useState([])
     const messageContainerRef = useRef()
     const [analyseType, setAnalyseType] = useState(2) //选择分析模式(system prompt)
     const [conversationHistory, setConversationHistory] = useState([]);//the messages list, history messages
@@ -58,27 +57,29 @@ export default function ChatContainer({ articleLabels }) {
 
         if (storedMessages) {
             const messagesList = JSON.parse(storedMessages);
-            setMessages(prevMessages => {
+            setConversationHistory(prevMessages => {
                 if (JSON.stringify(prevMessages) !== JSON.stringify(messagesList)) {
                     return messagesList;
                 }
                 return prevMessages;
             });
+        } else {
+            setConversationHistory(prevData => {
+                return [
+                    ...prevData,
+                    buildSystemPromptContentBasedOnType(analyseType), //初始化系统分析模式
+                ]
+            })
         }
         setTimeout(() => {
             scrollToBottom();
         }, 350);
-        setConversationHistory(prevData => {
-            return [
-                ...prevData,
-                buildSystemPromptContentBasedOnType(analyseType), //初始化系统分析模式
-            ]
-        })
+
     }, []);
 
     useEffect(() => {
-        localStorage.setItem('messages', JSON.stringify(messages))
-    }, [messages])
+        localStorage.setItem('messages', JSON.stringify(conversationHistory))
+    }, [conversationHistory])
 
 
     useEffect(() => {
@@ -99,7 +100,11 @@ export default function ChatContainer({ articleLabels }) {
 
     const clearLocalMessages = () => {
         localStorage.removeItem('messages')
-        setMessages([])
+        setConversationHistory(() => {
+            return [
+                buildSystemPromptContentBasedOnType(analyseType), //初始化系统分析模式
+            ]
+        })
     }
 
     //本组件主要请求接口，openai流式相应
@@ -149,7 +154,7 @@ export default function ChatContainer({ articleLabels }) {
                 const { done, value } = await reader.read();
                 if (done) break;
                 const chunkStr = decoder.decode(value, { stream: true });
-
+                scrollToBottom();
                 const events = parseStreamEvent(chunkStr)
 
                 for (const event of events) {
@@ -162,10 +167,9 @@ export default function ChatContainer({ articleLabels }) {
                         replyContent = event.text;
                         setReply(replyContent);
                     }
-                    scrollToBottom();
                 }
-
             }
+            scrollToBottom();
             setIsStreaming(false)
             setLoading(false)
             setConversationHistory(prevData => {
@@ -199,47 +203,48 @@ export default function ChatContainer({ articleLabels }) {
 
     return (
         <div className='chat-layout-main'>
-        
-                <FormControl fullWidth variant="standard">
-                    <InputLabel id="demo-simple-select-label"
-                        sx={{
-                            color: 'var(--foreground)', '&.Mui-focused': {
-                                color: analyseTypeColors[analyseType] // 聚焦时使用对应颜色
-                            }
 
-                        }}
-                    >Analyse Type
-                    </InputLabel>
-                    <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        value={analyseType}
-                        label="Published From"
-                        onChange={handleChangeAnalyseType}
+            <FormControl fullWidth variant="standard">
+                <InputLabel id="demo-simple-select-label"
+                    sx={{
+                        color: 'var(--foreground)', '&.Mui-focused': {
+                            color: analyseTypeColors[analyseType] // 聚焦时使用对应颜色
+                        },
+                        paddingLeft: '10px',
+                    }}
+                >Analyse Type
+                </InputLabel>
+                <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={analyseType}
+                    label="Published From"
+                    onChange={handleChangeAnalyseType}
 
-                        sx={{
-                            color: 'var(--foreground)',
-                            '& .MuiOutlinedInput-notchedOutline': {
-                                borderColor: analyseTypeColors[analyseType], // 边框颜色
-                            },
-                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                                borderColor: analyseTypeColors[analyseType], // 悬停时边框颜色
-                            },
-                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                borderColor: analyseTypeColors[analyseType], // 聚焦时边框颜色
-                            },
-                            '& .MuiSvgIcon-root': {
-                                color: analyseTypeColors[analyseType], // 下拉图标颜色
-                            },
-                        }}
-                    >
-                        <MenuItem value={1}>wallstreet</MenuItem>
-                        <MenuItem value={2}>Economist</MenuItem>
-                        <MenuItem value={3}>Politics</MenuItem>
-                        <MenuItem value={4}>Quantity Trader</MenuItem>
-                    </Select>
-                </FormControl>
-      
+                    sx={{
+                        color: 'var(--foreground)',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor: analyseTypeColors[analyseType], // 边框颜色
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: analyseTypeColors[analyseType], // 悬停时边框颜色
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: analyseTypeColors[analyseType], // 聚焦时边框颜色
+                        },
+                        '& .MuiSvgIcon-root': {
+                            color: analyseTypeColors[analyseType], // 下拉图标颜色
+                        },
+                        paddingLeft: '10px',
+                    }}
+                >
+                    <MenuItem value={1}>wallstreet</MenuItem>
+                    <MenuItem value={2}>Economist</MenuItem>
+                    <MenuItem value={3}>Politics</MenuItem>
+                    <MenuItem value={4}>Quantity Trader</MenuItem>
+                </Select>
+            </FormControl>
+
             <CssBaseline />
             <Box className='message-container'
                 ref={messageContainerRef}
@@ -264,7 +269,8 @@ export default function ChatContainer({ articleLabels }) {
                 </Container>
             </Box>
             <div style={{ position: 'relative', zIndex: 1 }}>
-                {messages.length !== 0 ? (
+                {/* 清空聊天记录的按钮 */}
+                {conversationHistory.length >= 2 ? (
                     <Fab
                         variant='extended'
                         size='small'
