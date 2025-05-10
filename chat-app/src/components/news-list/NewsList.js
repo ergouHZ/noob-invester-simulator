@@ -1,36 +1,38 @@
 'use client';
 import { getTimestampDaysAndHoursAgo } from '@/utils/customTime';
-import { Box, Button } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import { Box, Button, Snackbar } from '@mui/material';
+import FormControl from '@mui/material/FormControl';
+import IconButton from '@mui/material/IconButton';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import { useEffect, useRef, useState } from 'react';
 import { fetchLabelAnalysisKeywords, fetchNewsByFilters } from '../../api/api';
 import ToggleTheme from '../toggleTheme';
 import NewsCard from './NewsCard';
 
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
+
+
 export default function NewsList({ onUpdateLabels }) {
     const [cards, setCards] = useState([]);            //新闻的数据组
-    const [startTime, setStartTime] = useState(getTimestampDaysAndHoursAgo(2, 1));    //搜索新闻的起始时间，注意api有24小时延迟
-    const [startTimeType, setStartTimeType] = useState(1); // 1/2/8/31 用于正确显示选择菜单，时间戳无法显示
+    const [startTime, setStartTime] = useState(getTimestampDaysAndHoursAgo(8, 0));    //搜索新闻的起始时间，注意api有24小时延迟
+    const [startTimeType, setStartTimeType] = useState(8); // 1/2/8/31 用于正确显示选择菜单，时间戳无法显示
     const [isHeadline, setIsHeadline] = useState(false)  //是否获取头条新闻
     const [currentPage, setCurrentPage] = useState(1)  //当前数据库页数
     const [totalNews, setTotalNews] = useState(999)  //当前类别新闻总数
+    const [openSnack, setOpenSnack] = useState(false); //“没有更多文章的提示”
     const [initialFetchDone, setInitialFetchDone] = useState(false)
-    const [age, setAge] = useState('');
     const containerRef = useRef(null);
     const pageSize = 20; //默认每次请求数量
 
     useEffect(() => {
         setCards([])
         if (currentPage !== 1) {
-            console.log(1)
             setCurrentPage(1);
             onHandleFetchNewsByFilters();
         } else {
             if (initialFetchDone) {
-                console.log(2)
                 onHandleFetchNewsByFilters();
             }
         }
@@ -39,11 +41,9 @@ export default function NewsList({ onUpdateLabels }) {
     useEffect(() => {
         // 避免在页面初始化时多次请求
         if (currentPage === 1 && !initialFetchDone) {
-            console.log(3)
             onHandleFetchNewsByFilters();
             setInitialFetchDone(true);
         } else if (currentPage !== 1) {
-            console.log(4)
             onHandleFetchNewsByFilters();
         }
     }, [currentPage]);
@@ -80,7 +80,7 @@ export default function NewsList({ onUpdateLabels }) {
     useEffect(() => {
         //如果不再有更多结果，不在触发监听
         if (currentPage * pageSize >= totalNews) {
-            console.log(" no more !")
+            setOpenSnack(true)
             return
         }
         const container = containerRef.current;
@@ -118,8 +118,26 @@ export default function NewsList({ onUpdateLabels }) {
         onUpdateLabels(fetchLabelAnalysisKeywords(cards))//传数据到主页面
     }
 
-    return (
+    const handleSnackClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpenSnack(false);
+    };
+    //snack bar button
+    const action = (
+        <IconButton
+            size="small"
+            aria-label="close"
+            color="inherit"
+            onClick={handleSnackClose}
+        >
+            <CloseIcon fontSize="small" />
+        </IconButton>
 
+    );
+
+    return (
         <Box
             ref={containerRef}
             className="card-list"
@@ -196,8 +214,15 @@ export default function NewsList({ onUpdateLabels }) {
                     />
                 ))}
             </Box>
-        </Box>
 
+            <Snackbar
+                open={openSnack}
+                autoHideDuration={6000}
+                onClose={handleSnackClose}
+                message="No more articles"
+                action={action}
+            />
+        </Box>
 
     );
 }
