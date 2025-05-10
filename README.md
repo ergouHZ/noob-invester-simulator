@@ -56,20 +56,34 @@ API Keys configuration
 
 ### 运行步骤 Running Steps
    ```bash
+    cd noob-investor-simulator
+   ```
+   ```bash
     cd python_server
-
+   ```
+   ```bash
     pip install -r requirements.txt
-    (linux)
-    python3.11 -m pip install --user -r requirements.txt
+   ```  
 
+      (linux)
+   ```bash
+    python3.11 -m pip install --user -r requirements.txt
+   ```
+
+   ```bash
     python app.py
    ```
+
 
 也可以在运行服务器的基础上通过前端查看  
 You can also view and interact with the system directly through the frontend
    ```bash
     cd chat-app
+   ```
+   ```bash
     npm install
+   ```
+   ```bash
     npm run dev
    ```
 
