@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "cross-env PORT=4000 next start",
     "lint": "next lint"
   },
   "dependencies": {
@@ -21,12 +21,9 @@
     "next": "15.3.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-infinite-scroll-component": "^6.1.0",
     "react-markdown": "^10.1.0",
     "rehype-highlight": "^7.0.2",
-    "rehype-raw": "^7.0.0",
-    "rehype-sanitize": "^6.0.0",
-    "remark-gfm": "^4.0.1"
+    "rehype-sanitize": "^6.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
