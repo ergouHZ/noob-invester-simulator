@@ -9,42 +9,47 @@ from utils.time_utils import formatted_time_1_is_earlier_than_2
 
 logger = logging.getLogger(__name__)
 
-
-def db_add_multiple_articles(articles,is_headline = True):
-    """
-    一次存入多个文章
+def db_add_multiple_articles(articles, is_headline=True):
+    """ 一次存入多个文章
     :param is_headline: 是否存入头条文章
     :param articles:
     :return:
     """
     if not articles:
         return True, "No articles to save"
-    session = db.session()
 
+    session = db.session()
+    saved_count = 0
     try:
-        with session.begin():
-            db_articles_to_add = []
-            for article in articles:
-                cleaned = clean_article(article, is_headline)
-                title = cleaned.get('title')
-                # 检查数据库中是否存在相同标题
-                exists = session.query(NewsArticle).filter_by(title=title).first()
-                if exists:
-                    continue
-                # 如果不存在，则加入待插入列表
-                db_articles_to_add.append(NewsArticle(**cleaned))
-            # 批量插入
-            session.add_all(db_articles_to_add)
-        logger.info(f"成功保存了 {len(db_articles_to_add)} 篇文章")
-        return True, "Successfully saved articles"
-    except IntegrityError:
-        session.rollback()
-        logger.warning("Some articles were skipped due to duplicate titles.")
-        return False, "Some articles were skipped because they already exist."
-    except SQLAlchemyError as e:
-        session.rollback()
-        logger.error(f"数据库错误：{str(e)}")
-        return False, f"Database error: {str(e)}"
+        # 不再使用 with session.begin()，改为每条单独提交
+        for article in articles:
+            cleaned = clean_article(article, is_headline)
+            title = cleaned.get('title')
+            # 单条查重
+            exists = session.query(NewsArticle).filter_by(title=title).first()
+            if exists:
+                continue  # 跳过已存在的
+
+            # 不存在则插入
+            new_article = NewsArticle(**cleaned)
+            session.add(new_article)
+            try:
+                session.commit()  # 每条单独提交
+                saved_count += 1
+            except IntegrityError:
+                session.rollback()
+                logger.warning(f"Skipped article with duplicate title: {title}")
+            except SQLAlchemyError as e:
+                session.rollback()
+                logger.error(f"数据库错误，文章标题[{title}]：{str(e)}")
+                # 如果你想遇到数据库错误时跳出循环，可以加上break或者return
+                # 这里继续执行下一条
+            except Exception as e:
+                session.rollback()
+                logger.error(f"Unexpected error for title [{title}]: {str(e)}")
+
+        logger.info(f"成功保存了 {saved_count} 篇文章")
+        return True, f"Successfully saved {saved_count} articles"
     except Exception as e:
         session.rollback()
         return False, f"Unexpected error: {str(e)}"
